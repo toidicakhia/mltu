@@ -18,13 +18,13 @@ from model import train_model
 from configs import ModelConfigs
 
 import os
-from urllib.request import urlopen
+import requests
 from io import BytesIO
 from zipfile import ZipFile
 
 
 def download_and_unzip(url, extract_to="Datasets"):
-    http_response = urlopen(url)
+    http_response = requests.get(url, verify=False)
     zipfile = ZipFile(BytesIO(http_response.read()))
     zipfile.extractall(path=extract_to)
 
@@ -63,6 +63,9 @@ data_provider = DataProvider(
         LabelPadding(max_word_length=configs.max_text_length, padding_value=len(configs.vocab))
         ],
 )
+
+data_provider.workers = configs.train_workers
+
 # Split the dataset into training and validation sets
 train_data_provider, val_data_provider = data_provider.split(split = 0.9)
 
@@ -82,6 +85,8 @@ model.compile(
     metrics=[CWERMetric(padding_token=len(configs.vocab))],
     run_eagerly=False
 )
+
+
 model.summary(line_length=110)
 # Define path to save the model
 os.makedirs(configs.model_path, exist_ok=True)
@@ -93,6 +98,8 @@ trainLogger = TrainLogger(configs.model_path)
 tb_callback = TensorBoard(f"{configs.model_path}/logs", update_freq=1)
 reduceLROnPlat = ReduceLROnPlateau(monitor="val_CER", factor=0.9, min_delta=1e-10, patience=20, verbose=1, mode="min")
 model2onnx = Model2onnx(f"{configs.model_path}/model.h5")
+
+
 
 # Train the model
 model.fit(
