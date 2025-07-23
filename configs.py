@@ -7,7 +7,7 @@ from mltu.configs import BaseModelConfigs
 class ModelConfigs(BaseModelConfigs):
     def __init__(self):
         super().__init__()
-        self.model_path = os.path.join("Models/02_captcha_to_text", datetime.strftime(datetime.now(), "%Y%m%d%H%M"))
+        self.model_path = os.path.join("Models/captcha")
         self.vocab = ""
         self.height = 128
         self.width = 128

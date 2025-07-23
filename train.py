@@ -25,7 +25,7 @@ from zipfile import ZipFile
 
 def download_and_unzip(url, extract_to="Datasets"):
     http_response = requests.get(url, verify=False)
-    zipfile = ZipFile(BytesIO(http_response.read()))
+    zipfile = ZipFile(BytesIO(http_response.content))
     zipfile.extractall(path=extract_to)
 
 
@@ -100,14 +100,12 @@ reduceLROnPlat = ReduceLROnPlateau(monitor="val_CER", factor=0.9, min_delta=1e-1
 model2onnx = Model2onnx(f"{configs.model_path}/model.h5")
 
 
-
 # Train the model
 model.fit(
     train_data_provider,
     validation_data=val_data_provider,
     epochs=configs.train_epochs,
     callbacks=[earlystopper, checkpoint, trainLogger, reduceLROnPlat, tb_callback, model2onnx],
-    # workers=configs.train_workers
 )
 
 # Save training and validation datasets as csv files
